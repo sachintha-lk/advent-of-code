@@ -24,29 +24,11 @@ public class Main {
                 int[] numbers = Arrays.stream(line.split(" "))
                         .mapToInt(Integer::parseInt)
                         .toArray();
-                boolean isSafe = true;
-                boolean isIncreasing = false;
-                for (int i = 0; i < numbers.length; i++) {
-                    if (i < numbers.length - 1) {
-                        if (i == 0) {
-                            isIncreasing = numbers[i] < numbers[i + 1];
-                        } else {
 
-                            if (isIncreasing && (numbers[i] > numbers[i+1])) {
-                                isSafe = false;
-                                break;
-                            } else if (!isIncreasing && (numbers[i] < numbers[i+1])) {
-                                isSafe = false;
-                                break;
-                            }
-                        }
+                boolean isSafe = checkSafety(numbers, minSafeChange, maxSafeChange);
 
-                        int difference = abs(numbers[i] - numbers[i+1] );
-
-                        if (difference < minSafeChange || maxSafeChange < difference) {
-                            isSafe = false;
-                        }
-                    }
+                if (!isSafe && canBeSafeWithOneRemoval(numbers, minSafeChange, maxSafeChange)) {
+                    isSafe = true;
                 }
 
                 if (isSafe) {
@@ -63,6 +45,41 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+
+    private static boolean checkSafety(int[] numbers, int minSafeChange, int maxSafeChange) {
+        boolean isIncreasing = numbers[0] < numbers[1];
+
+        for (int i = 0; i < numbers.length - 1; i++) {
+            int difference = abs(numbers[i] - numbers[i + 1]);
+
+            if ((isIncreasing && numbers[i] > numbers[i + 1]) ||
+                    (!isIncreasing && numbers[i] < numbers[i + 1]) ||
+                    difference < minSafeChange || difference > maxSafeChange) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean canBeSafeWithOneRemoval(int[] numbers, int minSafeChange, int maxSafeChange) {
+        for (int indexToRemove = 0; indexToRemove < numbers.length; indexToRemove++) {
+            int[] modifiedNumbers = new int[numbers.length - 1];
+            int newArrayIndex = 0;
+
+            for (int originalIndex = 0; originalIndex < numbers.length; originalIndex++) {
+                if (originalIndex != indexToRemove) {
+                    modifiedNumbers[newArrayIndex] = numbers[originalIndex];
+                    newArrayIndex++;
+                }
+            }
+
+            if (checkSafety(modifiedNumbers, minSafeChange, maxSafeChange)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
